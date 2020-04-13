@@ -15,5 +15,7 @@ ENV PATH /usr/src/react-kanopy/node_modules/.bin:$PATH
 RUN npm install --silent
 RUN npm install react-scripts -g --silent
 
+EXPOSE 8080
+
 # start app
 CMD ["npm", "start"]
