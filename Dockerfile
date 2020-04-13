@@ -1,5 +1,5 @@
 # base image
-FROM node:12.2.0-alpine
+FROM node:13.12.0-alpine
 
 # set working directory
 RUN mkdir -p /usr/src/react-kanopy
@@ -12,7 +12,7 @@ WORKDIR /usr/src/react-kanopy
 ENV PATH /usr/src/react-kanopy/node_modules/.bin:$PATH
 
 # install and cache app dependencies
-RUN npm config set unsafe-perm true
+
 RUN npm install --silent
 RUN npm install react-scripts -g --silent
 
