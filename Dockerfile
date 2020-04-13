@@ -14,7 +14,7 @@ ENV PATH /usr/src/react-kanopy/node_modules/.bin:$PATH
 # install and cache app dependencies
 
 RUN npm install --silent
-RUN npm install react-scripts -g --silent
+RUN npm install react-scripts@3.4.0 -g --silent
 
 EXPOSE 8080
 
