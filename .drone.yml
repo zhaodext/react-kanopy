@@ -1,7 +1,11 @@
 ---
 clone:
 pipeline:
-   
+    unit-testing:
+        image: node:13
+        commands:
+            - npm install
+            - npm test
 
     publish:
         image: plugins/ecr
@@ -33,7 +37,7 @@ pipeline:
         tiller_ns: internal-tools
         client_only: true
         values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/internal-tools/${DRONE_REPO_NAME},ingress.enabled=false"
-        values_files: ["environments/staging.yaml"]
+        # values_files: ["environments/staging.yaml"]
         when:
             branch: master
             event: push
