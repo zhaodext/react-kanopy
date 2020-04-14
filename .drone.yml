@@ -1,10 +1,7 @@
 ---
 clone:
 pipeline:
-    unit-testing:
-        image: node:13
-        commands:
-            - npm test
+   
 
     publish:
         image: plugins/ecr
