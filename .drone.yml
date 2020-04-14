@@ -1,43 +1,44 @@
 ---
-clone:
-pipeline:
-    # unit-testing:
-    #     image: node:13
-    #     commands:
-    #         - npm install
-    #         - npm test
-
-    publish:
-        image: plugins/ecr
-        secrets: [ecr_access_key, ecr_secret_key]
+    kind: pipeline
+    type: kubernetes
+    name: default
+    
+    trigger:
+      branch:
+      - master
+    
+    steps:
+    - name: publish
+      image: plugins/ecr
+      settings:
+        create_repository: true
         registry: 795250896452.dkr.ecr.us-east-1.amazonaws.com
         repo: 795250896452.dkr.ecr.us-east-1.amazonaws.com/internal-tools/${DRONE_REPO_NAME}
-        build_args:
-          - NAME=react-kanopy
-        create_repository: true
         tags:
-          - git-${DRONE_COMMIT_SHA:0:7}
-          - latest
-        when:
-          event: push
-          branch: master
-
-    deploy-staging:
-        image: quay.io/mongodb/drone-helm:v2.14.1-0.1.0
-        # The release name should be unique across the namespace, the app or repo name is recommended
-        release: react-kanopy
-        namespace: internal-tools
-        environment:
-            - API_SERVER=https://api.staging.corp.mongodb.com
-        prefix: staging
-        secrets: [staging_kubernetes_token]
-        helm_repos: mongodb=https://10gen.github.io/helm-charts
+        - git-${DRONE_COMMIT_SHA:0:7}
+        - latest
+        access_key:
+          from_secret: ecr_access_key
+        secret_key:
+          from_secret: ecr_secret_key
+      when:
+        event:
+        - push
+    
+    - name: deploy-staging
+      image: quay.io/mongodb/drone-helm:v2
+      settings:
         chart: mongodb/web-app
         chart_version: 4.6.0
-        tiller_ns: internal-tools
         client_only: true
-        values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/internal-tools/${DRONE_REPO_NAME},ingress.enabled=false"
-        # values_files: ["environments/staging.yaml"]
-        when:
-            branch: master
-            event: push
+        helm_repos: mongodb=https://10gen.github.io/helm-charts
+        namespace: internal-tools
+        release: react-kanopy
+        tiller_ns: internal-tools
+        values: image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/internal-tools/${DRONE_REPO_NAME},ingress.enabled=true,ingress.hosts[0]=react-kanopy.internal-tools.staging.corp.mongodb.com
+        api_server: https://api.staging.corp.mongodb.com
+        kubernetes_token:
+          from_secret: staging_kubernetes_token
+      when:
+        event:
+        - push
